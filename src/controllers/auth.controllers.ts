@@ -1,11 +1,22 @@
 import { Request, Response } from "express";
 import authServices from "../services/auth.services";
 import { createAccessToken, createRefreshToken } from "../utils/jwtToken";
+import User from "../models/user.model";
 
-const signUpUser = async (req: Request, res: Response): Promise<void> => {
+const signUpUser = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { body: newData } = req;
-    const result = await authServices.signUpUser(newData);
+    if (!req.file) {
+      return res.status(400).json({ message: "Profile picture is required" });
+    }
+
+    const userExists = await User.isUserExist(req.body.email);
+    if (userExists) {
+      res.status(400).json({ message: "Email is already taken" });
+      return;
+    }
+
+    const result = await authServices.signUpUser(req.body, req.file);
+
     res.status(200).json({
       status: 200,
       message: "Account created successfully",
@@ -41,7 +52,7 @@ const login = async (req: Request, res: Response): Promise<void> => {
     } else {
       res.status(401).json({
         status: 401,
-        message: "Login failed. Invalid credentials.",
+        message: "Login failed, invalid credentials!",
       });
     }
   } catch (error) {
@@ -54,7 +65,7 @@ const login = async (req: Request, res: Response): Promise<void> => {
 const resetPassword = async (req: Request, res: Response): Promise<void> => {
   try {
     const token = req.headers.authorization || "";
-    const result = authServices.resetPassword(req.body, token);
+    const result = await authServices.resetPassword(req.body, token);
     res
       .status(500)
       .json({ status: 500, message: "reset password done", data: result });
@@ -72,3 +83,7 @@ const authControllers = {
 };
 
 export default authControllers;
+function isUserExist(email: any) {
+  throw new Error("Function not implemented.");
+}
+

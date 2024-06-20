@@ -1,4 +1,5 @@
 import express, { Request, Response, Router } from "express";
+import multer from "multer";
 import asyncHandler from "../middleware/asyncHandler";
 import authControllers from "../controllers/auth.controllers";
 import { protectRoute } from "../middleware/protectRoute";
@@ -6,9 +7,10 @@ import { protectRoute } from "../middleware/protectRoute";
 const router: Router = express.Router();
 type Route = Record<string, any>;
 
+const upload = multer();
+
 const mapRoutesToController = (routes: Route[]) => {
   routes.forEach(({ method, path, controller, middleware }) => {
-    // Add middleware to route definition
     switch (method) {
       case "GET":
         router.get(path, middleware, asyncHandler(controller));
@@ -32,7 +34,7 @@ const routes: Route[] = [
     method: "POST",
     path: "/signup",
     controller: authControllers.signUpUser,
-    middleware: [],
+    middleware: [upload.single("profilePic")],
   },
   {
     method: "POST",

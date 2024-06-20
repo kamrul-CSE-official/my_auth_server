@@ -8,14 +8,14 @@ type JwtPayload = {
 
 export const createRefreshToken = (payload: JwtPayload): string => {
   return jwt.sign(payload, envConfig.refreshTokenSecret as string, {
-    expiresIn: envConfig.refreshTokenExpiresIn,
+    expiresIn: Number(envConfig.refreshTokenExpiresIn),
     algorithm: "HS384",
   });
 };
 
 export const createAccessToken = (payload: JwtPayload): string => {
   return jwt.sign(payload, envConfig.accessTokenSecret as string, {
-    expiresIn: envConfig.accessTokenExpiresIn,
+    expiresIn: Number(envConfig.accessTokenExpiresIn),
     algorithm: "HS512",
   });
 };

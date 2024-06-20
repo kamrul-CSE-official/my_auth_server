@@ -1,7 +1,28 @@
+import axios from "axios";
+import FormData from "form-data";
 import User, { IUser } from "../models/user.model";
+import envConfig from "../configs/envConfig";
 
-const signUpUser = async (data: IUser): Promise<IUser | null> => {
+const signUpUser = async (
+  data: IUser,
+  file: Express.Multer.File
+): Promise<IUser | null> => {
   try {
+    const form = new FormData();
+    form.append("file", file.buffer, file.originalname);
+    form.append("key", envConfig.fileUploadKey as string);
+
+    const response = await axios.post(
+      "https://file-uploder-server.vercel.app/fileUpload",
+      form,
+      {
+        headers: form.getHeaders(),
+      }
+    );
+
+    data.img = response.data.fileUrl;
+
+    // Create new user
     const newUser = await User.create(data);
     return newUser;
   } catch (error: any) {
@@ -16,7 +37,6 @@ const login = async (data: {
   try {
     const { email, password } = data;
     const user = await User.isUserExist(email);
-
     if (!user || !(await User.isPasswordMatched(password, user.password))) {
       return false;
     }

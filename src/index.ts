@@ -8,7 +8,9 @@ const PORT = envConfig.port || 3001;
 databaseConnection()
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`Server is listening on port ${PORT} 🏃...`);
+      console.log(
+        `Server is listening on port ${PORT} 🏃 http://localhost:${PORT}...`
+      );
     });
   })
   .catch((error: any) => {

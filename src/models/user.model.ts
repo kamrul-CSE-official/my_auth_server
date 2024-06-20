@@ -5,16 +5,15 @@ import envConfig from "../configs/envConfig";
 // Define interfaces
 export type IUser = {
   name: string;
-  email: string | undefined;
-  mobile: string | undefined;
-  gender: "Male" | "Female" | "Other";
+  email: string;
   img?: string;
   password: string;
   role?: string;
 };
 
-type IUserDocument = IUser & Document;
-type IUserModel = {
+export type IUserDocument = IUser & Document;
+
+export type IUserModel = {
   isUserExist(email: string): Promise<IUserDocument | null>;
   isPasswordMatched(
     givenPassword: string,
@@ -29,17 +28,8 @@ const userSchema = new Schema<IUserDocument>(
     email: {
       type: String,
       required: [true, "Email is required"],
-      unique: [true, "Email must be unique"],
-    },
-    mobile: {
-      type: String,
-      required: [true, "Mobile is required"],
-      unique: [true, "Mobile must be unique"],
-    },
-    gender: {
-      type: String,
-      required: [true, "Gender is required"],
-      enum: { values: ["Male", "Female", "Other"], message: "Invalid gender" },
+      unique: true,
+      match: [/.+@.+\..+/, "Please fill a valid email address"],
     },
     img: { type: String, default: "https://i.ibb.co/bP8sJzJ/user.png" },
     password: {
@@ -53,14 +43,17 @@ const userSchema = new Schema<IUserDocument>(
   { timestamps: true }
 );
 
-
-
 // Middleware to hash password before saving
 userSchema.pre<IUserDocument>("save", async function (next) {
-  if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, Number(envConfig.bcrypt));
+  try {
+    if (this.isModified("password")) {
+      const saltRounds = Number(envConfig.bcrypt) || 10;
+      this.password = await bcrypt.hash(this.password, saltRounds);
+    }
+    next();
+  } catch (error: any) {
+    next(error);
   }
-  next();
 });
 
 // Static methods
