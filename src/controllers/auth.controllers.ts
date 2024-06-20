@@ -62,13 +62,15 @@ const login = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-const resetPassword = async (req: Request, res: Response): Promise<void> => {
+const forgetPasswordController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
-    const token = req.headers.authorization || "";
-    const result = await authServices.resetPassword(req.body, token);
+    const result = await authServices.forgetPasswordService(req.body);
     res
       .status(500)
-      .json({ status: 500, message: "reset password done", data: result });
+      .json({ status: 500, message: "Forget password done", data: result });
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Internal server error";
@@ -79,11 +81,9 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
 const authControllers = {
   signUpUser,
   login,
-  resetPassword,
+  forgetPasswordController,
 };
 
 export default authControllers;
-function isUserExist(email: any) {
-  throw new Error("Function not implemented.");
-}
+
 

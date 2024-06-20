@@ -8,14 +8,14 @@ type JwtPayload = {
 
 export const createRefreshToken = (payload: JwtPayload): string => {
   return jwt.sign(payload, envConfig.refreshTokenSecret as string, {
-    expiresIn: Number(envConfig.refreshTokenExpiresIn),
+    expiresIn: Number(envConfig.refreshTokenExpiresIn) || "30d",
     algorithm: "HS384",
   });
 };
 
 export const createAccessToken = (payload: JwtPayload): string => {
   return jwt.sign(payload, envConfig.accessTokenSecret as string, {
-    expiresIn: Number(envConfig.accessTokenExpiresIn),
+    expiresIn: Number(envConfig.accessTokenExpiresIn) || "5m",
     algorithm: "HS512",
   });
 };
@@ -23,7 +23,7 @@ export const createAccessToken = (payload: JwtPayload): string => {
 export const verifyRefreshToken = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const refreshToken = req.cookies?.refreshToken;
   if (!refreshToken) {
@@ -43,14 +43,14 @@ export const verifyRefreshToken = (
       }
       (req as any).refreshTokenData = decoded;
       next();
-    },
+    }
   );
 };
 
 export const verifyAccessToken = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const accessToken: string | undefined =
     req.headers?.authorization?.split(" ")[1];
@@ -90,6 +90,13 @@ export const verifyAccessToken = (
         (req as any).accessTokenData = decoded;
         next();
       }
-    },
+    }
   );
+};
+
+export const createPasswordResetToken = (payload: JwtPayload): string => {
+  return jwt.sign(payload, envConfig.accessTokenSecret as string, {
+    expiresIn: Number(envConfig.accessTokenExpiresIn) || "5m",
+    algorithm: "HS256",
+  });
 };

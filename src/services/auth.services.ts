@@ -2,6 +2,8 @@ import axios from "axios";
 import FormData from "form-data";
 import User, { IUser } from "../models/user.model";
 import envConfig from "../configs/envConfig";
+import { createPasswordResetToken } from "../utils/jwtToken";
+import { sendEmail } from "../utils/sendResetMail";
 
 const signUpUser = async (
   data: IUser,
@@ -12,13 +14,9 @@ const signUpUser = async (
     form.append("file", file.buffer, file.originalname);
     form.append("key", envConfig.fileUploadKey as string);
 
-    const response = await axios.post(
-      "https://file-uploder-server.vercel.app/fileUpload",
-      form,
-      {
-        headers: form.getHeaders(),
-      }
-    );
+    const response = await axios.post(envConfig.fileUploadAPI as string, form, {
+      headers: form.getHeaders(),
+    });
 
     data.img = response.data.fileUrl;
 
@@ -47,17 +45,25 @@ const login = async (data: {
   }
 };
 
-const resetPassword = async (
-  payload: { email: string; newPassword: string },
-  token: string
-) => {
+const forgetPasswordService = async ({ email }: { email: string }) => {
   try {
-    const { email, newPassword } = payload;
     const user = await User.isUserExist(email);
-    if (!user) {
+    if (!user || !email) {
       throw new Error("User not found");
     }
-    console.log("Reset....", payload, user);
+
+    const payload = { name: user.name, email: user.email, img: user.img };
+    const passResetToken = createPasswordResetToken(payload);
+    const resetLink = `${envConfig.clientSiteUrl}/resetPassword?token=${passResetToken}`;
+    console.log("Reset link:", resetLink);
+    sendEmail();
+
+    // // Send the reset link to the user's email
+    // await sendEmail({
+    //   to: user.email,
+    //   subject: "Password Reset",
+    //   text: `Dear ${user.name},\n\nYou requested to reset your password. Click the link below to reset your password:\n\n${resetLink}\n\nIf you did not request a password reset, please ignore this email.`,
+    // });
   } catch (error) {
     throw new Error(
       "Something went wrong during reset password. Please try again."
@@ -68,7 +74,7 @@ const resetPassword = async (
 const authServices = {
   signUpUser,
   login,
-  resetPassword,
+  forgetPasswordService,
 };
 
 export default authServices;

@@ -11,6 +11,10 @@ type Ienv = {
   bcrypt: string | undefined;
   nodeEnv: string | undefined;
   fileUploadKey: string | undefined;
+  fileUploadAPI: string | undefined;
+  clientSiteUrl: string | undefined;
+  emailAppPass: string | undefined;
+  email: string | undefined;
 };
 
 const envConfig: Ienv = {
@@ -23,6 +27,10 @@ const envConfig: Ienv = {
   bcrypt: process.env.BCRYPT_SALT_ROUNDS,
   nodeEnv: process.env.NODE_ENV,
   fileUploadKey: process.env.FileUploadKey || "",
+  fileUploadAPI: process.env.FileUploadAPI,
+  clientSiteUrl: process.env.CLIENT_SITE_URL,
+  emailAppPass: process.env.EMAIL_APP_PASSWORD,
+  email: process.env.EMAIL,
 };
 
 export default envConfig;

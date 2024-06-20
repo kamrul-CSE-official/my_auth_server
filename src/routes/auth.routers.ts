@@ -44,8 +44,14 @@ const routes: Route[] = [
   },
   {
     method: "POST",
-    path: "/reset-password",
-    controller: authControllers.resetPassword,
+    path: "/forget-password",
+    controller: authControllers.forgetPasswordController,
+    middleware: [],
+  },
+  {
+    method: "POST",
+    path: "/change-password",
+    controller: authControllers.forgetPasswordController,
     middleware: [protectRoute],
   },
 ];
