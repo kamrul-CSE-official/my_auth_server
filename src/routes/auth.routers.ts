@@ -3,6 +3,7 @@ import multer from "multer";
 import asyncHandler from "../middleware/asyncHandler";
 import authControllers from "../controllers/auth.controllers";
 import { protectRoute } from "../middleware/protectRoute";
+import { verifyAccessToken } from "../utils/jwtToken";
 
 const router: Router = express.Router();
 type Route = Record<string, any>;
@@ -53,6 +54,12 @@ const routes: Route[] = [
     path: "/change-password",
     controller: authControllers.forgetPasswordController,
     middleware: [protectRoute],
+  },
+  {
+    method: "POST",
+    path: "/reset-password",
+    controller: authControllers.resetPasswordController,
+    middleware: [verifyAccessToken],
   },
 ];
 

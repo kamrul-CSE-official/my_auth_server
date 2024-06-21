@@ -78,10 +78,44 @@ const forgetPasswordController = async (
   }
 };
 
+const resetPasswordController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const accessToken = req.headers?.authorization?.split(" ")[1];
+    if (!accessToken) {
+      res.status(401).json({
+        status: 403,
+        message: "Unautharize access!",
+      });
+    }
+
+    const result = await authServices.resetPasswordService(req.body);
+    console.log(result);
+    if (result) {
+      res.status(200).json({
+        status: 200,
+        message: "Successfully updated password.",
+      });
+    } else {
+      res.status(401).json({
+        status: 401,
+        message: "Login failed, invalid credentials!",
+      });
+    }
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ status: 500, message: errorMessage });
+  }
+};
+
 const authControllers = {
   signUpUser,
   login,
   forgetPasswordController,
+  resetPasswordController,
 };
 
 export default authControllers;

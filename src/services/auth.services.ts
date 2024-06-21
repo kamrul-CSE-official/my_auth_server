@@ -5,6 +5,7 @@ import envConfig from "../configs/envConfig";
 import { createPasswordResetToken } from "../utils/jwtToken";
 import { sendEmail } from "../utils/sendResetMail";
 
+
 const signUpUser = async (
   data: IUser,
   file: Express.Multer.File
@@ -91,10 +92,41 @@ const forgetPasswordService = async ({ email }: { email: string }) => {
   }
 };
 
+const resetPasswordService = async (data: {
+  email: string;
+  newPassword: string;
+}): Promise<IUser | false> => {
+  try {
+    const { email, newPassword } = data;
+
+    const user = await User.isUserExist(email);
+    if (!user) {
+      return false;
+    }
+
+    user.password = newPassword;
+
+    // Save the updated user document, which will trigger pre-save middleware
+    const updatedUser = await user.save();
+
+    if (!updatedUser) {
+      throw new Error("Failed to update user password");
+    }
+
+    return updatedUser;
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    throw new Error(
+      "Something went wrong during password reset. Please try again."
+    );
+  }
+};
+
 const authServices = {
   signUpUser,
   login,
   forgetPasswordService,
+  resetPasswordService,
 };
 
 export default authServices;
