@@ -46,27 +46,47 @@ const login = async (data: {
 };
 
 const forgetPasswordService = async ({ email }: { email: string }) => {
+  if (!email) {
+    throw new Error("Email is required");
+  }
+
   try {
     const user = await User.isUserExist(email);
-    if (!user || !email) {
+
+    if (!user) {
       throw new Error("User not found");
     }
 
     const payload = { name: user.name, email: user.email, img: user.img };
     const passResetToken = createPasswordResetToken(payload);
-    const resetLink: string = `${envConfig.clientSiteUrl}/resetPassword?token=${passResetToken}`;
+    const resetLink = `${envConfig.clientSiteUrl}/resetPassword?token=${passResetToken}`;
     console.log("Reset link:", resetLink);
-    // sendEmail();
 
-    // // Send the reset link to the user's email
-    // await sendEmail({
-    //   to: user.email,
-    //   subject: "Password Reset",
-    //   text: `Dear ${user.name},\n\nYou requested to reset your password. Click the link below to reset your password:\n\n${resetLink}\n\nIf you did not request a password reset, please ignore this email.`,
-    // });
+    await sendEmail(
+      email,
+      `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #f9f9f9;">
+        <h2 style="color: #333;">Password Reset Request</h2>
+        <p style="color: #555;">Hi, ${user.name}</p>
+        <p style="color: #555;">
+          We received a request to reset your password. Click the button below to reset your password:
+        </p>
+        <a href="${resetLink}" style="display: inline-block; margin: 20px 0; padding: 10px 20px; color: #fff; background-color: #007bff; border-radius: 5px; text-decoration: none;">
+          Reset Password
+        </a>
+        <p style="color: #555;">
+          If you did not request a password reset, please ignore this email or contact support if you have questions.
+        </p>
+        <p style="color: #555;">Thank you,</p>
+        <p style="color: #555;">The Support Team | My-Auth | 01823855998</p>
+      </div>
+    `,
+      "Reset password"
+    );
   } catch (error) {
+    console.error("Error in forgetPasswordService:", error);
     throw new Error(
-      "Something went wrong during reset password. Please try again."
+      "Something went wrong during password reset. Please try again."
     );
   }
 };
