@@ -54,9 +54,9 @@ const forgetPasswordService = async ({ email }: { email: string }) => {
 
     const payload = { name: user.name, email: user.email, img: user.img };
     const passResetToken = createPasswordResetToken(payload);
-    const resetLink = `${envConfig.clientSiteUrl}/resetPassword?token=${passResetToken}`;
+    const resetLink: string = `${envConfig.clientSiteUrl}/resetPassword?token=${passResetToken}`;
     console.log("Reset link:", resetLink);
-    sendEmail();
+    // sendEmail();
 
     // // Send the reset link to the user's email
     // await sendEmail({
